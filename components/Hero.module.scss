@@ -1,0 +1,18 @@
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 5vh; // Adjust height as needed
+  color: var(--theme-text); // Use theme variable for text color
+  text-align: center;
+  font-size: 4rem; // Increased font size for hero text
+}
+
+.title {
+  font-size: 10rem; // Base font size
+  @media (max-width: 768px) {
+    font-size: 6rem; // Smaller font size for smaller viewports
+  }
+  font-weight: bold;
+  font-family: 'Geist-Mono-Regular', monospace; // Use your preferred font
+} 

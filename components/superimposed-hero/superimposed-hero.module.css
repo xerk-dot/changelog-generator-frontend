@@ -1,0 +1,35 @@
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.textContainer {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  text-align: right;
+}
+
+.text {
+  font-size: clamp(4rem, 15vw, 12rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0 1rem;
+  color: var(--colorTextTitle);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  opacity: 0.9;
+}
+
+@media (max-width: 696px) {
+  .text {
+    font-size: clamp(3rem, 12vw, 8rem);
+  }
+} 

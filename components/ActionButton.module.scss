@@ -1,0 +1,78 @@
+.hotkey {
+  background: var(--theme-button-foreground);
+  color: var(--theme-text);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: 200ms ease all;
+  font-weight: 400;
+  transition-property: background;
+  padding: 0 0ch;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3ch;
+  height: calc(var(--font-size) * var(--theme-line-height-base));
+  svg {
+    display: block;
+    width: 30px;
+    height: 30px;
+
+  }
+}
+
+.content {
+  box-shadow: inset 0 0 0 2px var(--theme-button-foreground);
+  background: var(--theme-button-background);
+  text-indent: 0ch;
+  min-width: 10%;
+  width: 100%;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0 1ch;
+  text-transform: uppercase;
+  transition: 200ms ease all;
+  transition-property: background;
+  user-select: none;
+  height: calc(var(--font-size) * var(--theme-line-height-base));
+  display: flex;
+  align-items: center;
+
+}
+
+.root {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: space-between;
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size);
+  line-height: var(--theme-line-height-base);
+
+  &:hover .hotkey {
+    background: var(--theme-focused-foreground);
+  }
+
+  &:hover .content {
+    box-shadow: inset 0 0 0 2px var(--theme-focused-foreground);
+  }
+
+  &:focus .hotkey {
+    background: var(--theme-focused-foreground);
+  }
+
+  &:focus .content {
+    box-shadow: inset 0 0 0 2px var(--theme-focused-foreground);
+  }
+}
+
+.selected {
+  .content {
+    background: var(--theme-focused-foreground);
+  }
+}
