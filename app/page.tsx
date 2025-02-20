@@ -84,10 +84,9 @@ export default function Page() {
   return (
     <>
       <Grid>
-        <Hero word="END DOGE" isHalfHeight={true} />
-        <SubtitleHeader text="Small Federal == Efficient Deepstate" />
-        <SubtitleHeader text="a cloud-native government tramples your civil liberties" />
-        <SubtitleHeader text="doge HATES libertarians" />
+        <Hero word="CHANGELOG" isHalfHeight={true} />
+        <SubtitleHeader text="Cool shit!" />
+
         {/* Add any other components you want on the home page */}
       </Grid>
     </>

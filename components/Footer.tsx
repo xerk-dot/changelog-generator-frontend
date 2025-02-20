@@ -84,11 +84,11 @@ const Navigation: React.FC<NavigationProps> = ({ children, logoHref, logoTarget,
         justifyContent: 'center'
       }}>
         <ActionButton 
-          onClick={() => window.open('https://github.com/xerk-dot/gadsden', '_blank')} 
+          onClick={() => window.open('https://github.com/xerk-dot/changelog-custom', '_blank')} 
           hotkey="v0.22"
           style={{ cursor: 'pointer' }}
         >
-           gadsden 
+           changelog 
         </ActionButton>
       </div>
     </nav>

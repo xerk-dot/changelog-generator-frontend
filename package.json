@@ -1,6 +1,6 @@
 {
-  "name": "gadsden",
-  "description": "end doge",
+  "name": "changelog",
+  "description": "changelog",
   "engines": {
     "node": ">=18"
   },
