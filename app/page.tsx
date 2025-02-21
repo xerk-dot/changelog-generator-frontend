@@ -71,6 +71,7 @@ import { SuperimposedHero } from '@components/superimposed-hero/superimposed-her
 import CodeBlock from '@components/CodeBlock';
 import SidebarLayout from '@components/SidebarLayout';
 import Link from 'next/link';
+import RadioButton from '@root/components/RadioButton';
 
 const Carousel = lazy(() =>
   import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
@@ -81,9 +82,14 @@ export default function Page() {
     const [errorMessage, setErrorMessage] = useState<string>(''); // State for error message
     const [successMessage, setSuccessMessage] = useState<string>(''); // State for success message
     const [isLoading, setIsLoading] = useState<boolean>(false); // State to track loading status
+    const [changelog, setChangelog] = useState<string>(''); // State to hold changelog content
+    const [commitOption, setCommitOption] = useState<string>('one'); // State to track selected commit option
+    const [secondCommitOption, setSecondCommitOption] = useState<string>('one'); // State for the second button group
 
     const handleGenerate = async () => {
         setIsLoading(true); // Set loading status to true when button is pressed
+        setCommitOption('one'); // Ensure "All Commits" radio is selected
+
         if (!repoUrl) {
             setErrorMessage('Repository URL is required.'); // Set error message if input is empty
             setIsLoading(false); // Reset loading status after API call
@@ -113,9 +119,18 @@ export default function Page() {
             const data = await response.json();
             console.log(data); // Process the response as needed
             setSuccessMessage(data.message); // Set success message for display
+
+            // Fetch the changelog.md file after it is generated
+            const changelogResponse = await fetch('/changelog.md');
+            if (!changelogResponse.ok) {
+                throw new Error('Failed to fetch changelog');
+            }
+            const changelogText = await changelogResponse.text();
+            setChangelog(changelogText); // Store the changelog content
+
         } catch (error) {
             console.error('Error in API route:', error);
-            setErrorMessage('Failed to generate changelog. 2'); // Set error message for display
+            setErrorMessage('Failed to generate changelog.'); // Set error message for display
         }
         setIsLoading(false); // Reset loading status after API call
     };
@@ -123,20 +138,48 @@ export default function Page() {
     return (
         <div>
             <Hero word="(CHANGE)LOG" isHalfHeight={true}></Hero>
-            <Card title="generate changelog" maxWidth="70vw" centered>
+            <Card title="settings" maxWidth="70vw" centered>
                 <Input
                     type="text"
                     value={repoUrl}
                     onChange={(e) => setRepoUrl(e.target.value)}
-                    placeholder="https://github.com/vercel/ai.git"
+                    placeholder="ex: https://github.com/NVIDIA/cutlass"
                     label="Repository URL"
-            />
-            <Button onClick={handleGenerate}>Generate Changelog</Button>
+                />
+                <br />
+                <Badge isAllCaps={false}>Which commits should be used for the changelog?</Badge>
+                <RadioButtonGroup
+                    defaultValue={commitOption}
+                    onChange={(value) => setCommitOption(value)}
+                    options={[
+                        { value: 'one', label: 'All Commits' },
+                        //{ value: 'two', label: 'Custom' }
+                    ]}
+                    tabCount={3}
+                />
+{/*                 {commitOption === 'two' && (
+                    <RadioButtonGroup
+                        defaultValue={secondCommitOption}
+                        onChange={(value) => setSecondCommitOption(value)}
+                        options={[
+                            { value: 'one', label: 'Select Date Range' },
+                            { value: 'two', label: 'Select the last N commits' }
+                        ]}
+                    />
+                )} */}
+                <br />
+                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+                
+                <Button onClick={handleGenerate}>Generate Changelog</Button>
             </Card>
-            {(!errorMessage && !successMessage && isLoading) && <BarLoader intervalRate={100} />}
+            {isLoading && <BarLoader intervalRate={100} />}
 
-            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+            {(changelog) && (
+                <Card title="changelog" maxWidth="70vw" centered>
+                    <pre>{changelog}</pre>
+                </Card>
+            )}
         </div>
     );
 }

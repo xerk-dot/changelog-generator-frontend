@@ -13,23 +13,28 @@ interface RadioOption {
 interface RadioButtonGroupProps {
   options: RadioOption[];
   defaultValue?: string;
+  onChange?: (value: string) => void;
+  tabCount?: number;
 }
 
-const RadioButtonGroup: React.FC<RadioButtonGroupProps> = ({ options, defaultValue = '' }) => {
+const RadioButtonGroup: React.FC<RadioButtonGroupProps> = ({ options, defaultValue = '', onChange, tabCount = 0 }) => {
   const [selectedValue, setSelectedValue] = React.useState<string>(defaultValue);
 
   const handleSelect = (value: string) => {
     setSelectedValue(value);
+    if (onChange) {
+      onChange(value);
+    }
   };
 
   const selectedOption = options.find(option => option.value === selectedValue);
 
   return (
     <div className={styles.container}>
-      {options.map((option) => (
-        <div key={option.value} className={styles.radioWrapper}>
+      {options.map((option, index) => (
+        <div key={option.value} className={styles.radioWrapper} style={{ marginLeft: `${tabCount * 1}ch` }}>
           <RadioButton 
-            name="example" 
+            name="radio-group" 
             value={option.value} 
             selected={selectedValue === option.value} 
             onSelect={handleSelect}

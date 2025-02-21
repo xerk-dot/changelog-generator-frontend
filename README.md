@@ -40,6 +40,7 @@ The submission will be evaluated on the following criteria:
 2. to keep this straight-forward, both the frontend and developer tool will run the same file which generates a changelog from the commits
 3. we need to save the changelog to a file in the next.js app directory, which the frontend will read from
 4. i want the frontend to be next.js, so we will make the developer tool compatible with JS/TS
+5. implied requirement: ability to select a range of commits to use for the changelog. instructions imply a date range, but i want to allow the user to select the last N commits.
 
 
 
@@ -62,7 +63,8 @@ there are many non-AI implementations, from [git-cliff](https://github.com/orhun
 ### let's make frontend decisions
 
 -> monospace font, as the app is predominantly a text-based app
--> 
+-> site has two sections, settings and the generated changelog
+
 
 
 ### let's make backend decisions
