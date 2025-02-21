@@ -179,7 +179,7 @@ export default function Page() {
                 
                 <Button onClick={handleGenerate}>Generate Changelog</Button>
             </Card>
-            {isLoading && <BarLoader intervalRate={100} />}
+            {isLoading && <BarLoader intervalRate={1000} />}
 
             {(changelog) && (
                 <Card title="changelog" maxWidth="70vw" centered>

@@ -67,12 +67,12 @@ there are many non-AI implementations, from [git-cliff](https://github.com/orhun
 
 ### let's make frontend decisions
 
--> monospace font, as the app is predominantly a text-based app
--> site has two sections: a) settings and b) the generated changelog
--> the changelog (and the about section) will format the markdown with react-markdown. 
+- monospace font, as the app is predominantly a text-based app
+- site has two sections: a) settings and b) the generated changelog
+- the changelog (and the about section) will format the markdown with react-markdown. 
 
 
 ### let's make backend decisions
 
--> i want to use openai to generate the changelog.
--> we will use structured output to guide the format of the changelog.
+- i want to use openai to generate the changelog.
+- we will use structured output to guide the format of the changelog.
