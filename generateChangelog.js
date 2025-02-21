@@ -1,7 +1,11 @@
 // generateChangelog.js
 const fs = require('fs');
 const path = require('path');
+const OpenAI = require('openai'); // Import OpenAI library
 const axios = require('axios'); // Import axios for HTTP requests
+require('dotenv').config();
+
+const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY}); // Initialize OpenAI client
 
 // Function to generate changelog
 async function generateChangelog(repoUrl) {
@@ -11,13 +15,29 @@ async function generateChangelog(repoUrl) {
         return `- ${commitNumber}: ${commit.commit.message} (by ${commit.commit.author.name})`; // Include the number in the entry
     }).join('\n'); // Format commits
 
-    const changelog = `
+    // Call OpenAI API to summarize the changes
+    try {
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-2024-08-06",
+            messages: [
+                { role: "system", content: "You are a helpful changelog generator. Summarize the following commit messages." },
+                { role: "user", content: `Here are the commit messages:\n${changelogEntries}` },
+            ],
+        });
+
+        const generatedChangelog = completion.choices[0].message.content; // Extract the generated changelog
+
+        const changelog = `
 # Changelog
 
 ## [Unreleased]
-${changelogEntries} // Updated to include commit messages
-    `;
-    return changelog;
+${generatedChangelog} // Updated to include commit messages
+        `;
+        return changelog;
+    } catch (error) {
+        console.error('Error from OpenAI API:', error.response ? error.response.data : error.message);
+        throw new Error('Failed to generate changelog from OpenAI API.');
+    }
 }
 
 // Function to fetch all commits from the GitHub repository
@@ -45,7 +65,7 @@ async function fetchCommits(repoUrl) {
 function saveChangelog(changelog) {
     const filePath = path.join(__dirname, 'public', 'changelog.md');
     fs.writeFileSync(filePath, changelog);
-    console.log('Changelog generated and saved to .gpublic/changelog.md');
+    console.log('Changelog generated and saved to public/changelog.md');
 }
 
 // Main execution
@@ -56,7 +76,7 @@ if (!repoUrl) {
 }
 
 generateChangelog(repoUrl)
-    .then(changelog => saveChangelog(changelog))
+    .then(saveChangelog)
     .catch(error => {
         console.error('Error generating changelog:', error);
     });

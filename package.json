@@ -14,10 +14,12 @@
   },
   "dependencies": {
     "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
     "framer-motion": "^11.15.0",
     "fs": "0.0.1-security",
     "next": "^15.1.1",
     "node-fetch": "^3.3.2",
+    "openai": "^4.85.3",
     "raw-loader": "^4.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
