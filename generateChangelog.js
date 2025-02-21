@@ -30,7 +30,10 @@ async function generateChangelog(repoUrl) {
         const changelog = `
 # Changelog
 
-## [Unreleased]
+## [1.0.0] - ${new Date().toISOString().split('T')[0]} // Update this version and date accordingly
+_First release._
+
+### Added
 ${generatedChangelog} // Updated to include commit messages
         `;
         return changelog;

@@ -72,7 +72,8 @@ import CodeBlock from '@components/CodeBlock';
 import SidebarLayout from '@components/SidebarLayout';
 import Link from 'next/link';
 import RadioButton from '@root/components/RadioButton';
-
+import ReactMarkdown from 'react-markdown';
+import { MarkdownComponents } from '@root/components/MarkdownComponents';
 const Carousel = lazy(() =>
   import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
 );
@@ -134,6 +135,11 @@ export default function Page() {
         }
         setIsLoading(false); // Reset loading status after API call
     };
+    const markdownContent = (
+      <ReactMarkdown components={MarkdownComponents}>
+          {changelog}
+      </ReactMarkdown>
+    );
 
     return (
         <div>
@@ -177,7 +183,7 @@ export default function Page() {
 
             {(changelog) && (
                 <Card title="changelog" maxWidth="70vw" centered>
-                    <pre>{changelog}</pre>
+                    {markdownContent}
                 </Card>
             )}
         </div>

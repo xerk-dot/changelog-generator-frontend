@@ -12,9 +12,10 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   centered?: boolean;
   glow?: boolean;
   maxWidth?: string;
+  color?: string;
 }
 
-const Card: React.FC<CardProps> = ({ children, mode, title, centered, glow, maxWidth, ...rest }) => {
+const Card: React.FC<CardProps> = ({ children, mode, title, centered, glow, maxWidth, color, ...rest }) => {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
@@ -82,8 +83,11 @@ const Card: React.FC<CardProps> = ({ children, mode, title, centered, glow, maxW
 
   const cardContent = (
     <article
-      className={`${styles.card} ${glow ? styles.glow : ''}`}
-      style={{ maxWidth: isMobile ? '95vw' : maxWidth }}
+      className={`${styles.card} ${glow ? styles.glow : ''} ${color ? styles[color] : ''} ${centered ? styles.centered : ''}`}
+      style={{ 
+        maxWidth: isMobile ? '95vw' : maxWidth, 
+        backgroundColor: color
+      }}
     >
       {titleElement}
       <section className={styles.children}>{children}</section>

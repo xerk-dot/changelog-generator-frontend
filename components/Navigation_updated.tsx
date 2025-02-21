@@ -29,9 +29,15 @@ const Navigation: React.FC<NavigationProps> = ({ children, logoHref, logoTarget,
   const renderLeft = () => {
     return (
       <>
-        <Link href="/about" style={{ textDecoration: 'none' }}>
-          <ActionButton>ABOUT</ActionButton>
-        </Link>
+        {pathname === '/' ? (
+          <Link href="/about" style={{ textDecoration: 'none' }}>
+            <ActionButton>ABOUT</ActionButton>
+          </Link>
+        ) : (
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <ActionButton>BACK</ActionButton>
+          </Link>
+        )}
         {left}
       </>
     );

@@ -38,8 +38,8 @@ The submission will be evaluated on the following criteria:
 
 1. we need to fetch (only the) commits from a GitHub repository
 2. to keep this straight-forward, both the frontend and developer tool will run the same file which generates a changelog from the commits
-3. we need to save the changelog to a file in the next.js app directory, which the frontend will read from
-4. i want the frontend to be next.js, so we will make the developer tool compatible with JS/TS
+3. we need to save the changelog to a (markdown? json?) file in the next.js app directory, which the frontend will read from
+4. i want the frontend to be next.js, so we will make the developer tool compatible with (node)JS/TS
 5. implied requirement: ability to select a range of commits to use for the changelog. instructions imply a date range, but i want to allow the user to select the last N commits.
 
 
@@ -52,21 +52,27 @@ hmm. lets conceptualize the core functionality first. as a developer, what shoul
 
 ### let's research into current implementations
 
-[keepachangelog.com](https://keepachangelog.com/en/1.1.0/) has some nice literature on defining a changelog.
+
+
+
 
 there are many non-AI implementations, from [git-cliff](https://github.com/orhun/git-cliff) to [git-journal](https://github.com/saschagrunert/git-journal) to [clog-cli](https://github.com/clog-tool/clog-cli) to [git-chglog](https://github.com/git-chglog/git-chglog) to [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog). ill try them all to determine a good feature set.
 
 ### what should be on the changelog? how is it structured/syntaxed?
 
+[common-changelog.org](https://github.com/vweevers/common-changelog) has a list of implementations, and a specification for how a changelog should be formatted. so does [keepachangelog.com](https://keepachangelog.com/en/1.1.0/).`   
 
+
+### how will we organize the commits into versions/releases?
 
 ### let's make frontend decisions
 
 -> monospace font, as the app is predominantly a text-based app
--> site has two sections, settings and the generated changelog
-
+-> site has two sections: a) settings and b) the generated changelog
+-> the changelog (and the about section) will format the markdown with react-markdown. 
 
 
 ### let's make backend decisions
 
-If you want to fetch commits from a GitHub repository, you can use the node-fetch library to make API calls.
+-> i want to use openai to generate the changelog.
+-> we will use structured output to guide the format of the changelog.
