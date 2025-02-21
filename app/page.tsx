@@ -1,5 +1,4 @@
 'use client';
-
 import '@root/global.scss';
 
 import * as Constants from '@common/constants';
@@ -77,18 +76,67 @@ const Carousel = lazy(() =>
   import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
 );
 
-
 export default function Page() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['none']);
+    const [repoUrl, setRepoUrl] = useState<string>(''); // State to hold the input value
+    const [errorMessage, setErrorMessage] = useState<string>(''); // State for error message
+    const [successMessage, setSuccessMessage] = useState<string>(''); // State for success message
+    const [isLoading, setIsLoading] = useState<boolean>(false); // State to track loading status
 
-  return (
-    <>
-      <Grid>
-        <Hero word="CHANGELOG" isHalfHeight={true} />
-        <SubtitleHeader text="Cool shit!" />
+    const handleGenerate = async () => {
+        setIsLoading(true); // Set loading status to true when button is pressed
+        if (!repoUrl) {
+            setErrorMessage('Repository URL is required.'); // Set error message if input is empty
+            setIsLoading(false); // Reset loading status after API call
+            return;
+        }
+        
+        setErrorMessage(''); // Clear error message if input is valid
+        setSuccessMessage(''); // Clear previous success message
 
-        {/* Add any other components you want on the home page */}
-      </Grid>
-    </>
-  );
+        // Make API call to the new API route
+        try {
+            const response = await fetch('/api/generateChangelog', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: repoUrl }), // Send the URL string
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error from API:', errorData);
+                throw new Error('Network response was not ok');
+            }
+
+            // Handle successful response
+            const data = await response.json();
+            console.log(data); // Process the response as needed
+            setSuccessMessage(data.message); // Set success message for display
+        } catch (error) {
+            console.error('Error in API route:', error);
+            setErrorMessage('Failed to generate changelog. 2'); // Set error message for display
+        }
+        setIsLoading(false); // Reset loading status after API call
+    };
+
+    return (
+        <div>
+            <Hero word="(CHANGE)LOG" isHalfHeight={true}></Hero>
+            <Card title="generate changelog" maxWidth="70vw" centered>
+                <Input
+                    type="text"
+                    value={repoUrl}
+                    onChange={(e) => setRepoUrl(e.target.value)}
+                    placeholder="https://github.com/vercel/ai.git"
+                    label="Repository URL"
+            />
+            <Button onClick={handleGenerate}>Generate Changelog</Button>
+            </Card>
+            {(!errorMessage && !successMessage && isLoading) && <BarLoader intervalRate={100} />}
+
+            {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
+        </div>
+    );
 }
