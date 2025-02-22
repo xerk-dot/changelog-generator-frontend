@@ -6,6 +6,7 @@
   },
   "license": "MIT",
   "version": "0.0.24",
+  "type": "module",
   "scripts": {
     "dev": "next -p 2004",
     "build": "next build",

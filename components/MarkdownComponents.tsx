@@ -21,7 +21,7 @@ export const MarkdownComponents = {
         if (codeString.startsWith('```') && codeString.endsWith('```')) {
             return (
                 <pre style={{ backgroundColor: 'rgba(128, 128, 128, 0.2)', padding: '1em', paddingLeft: '1.5rem', marginBottom: '.5em' }}>
-                    <code>{codeString.slice(3, -3).trim()}</code>
+                    <code>{codeString.slice(0, -3).trim()}</code>
                 </pre>
             );
         }

@@ -205,7 +205,7 @@ export default function Page() {
                 title="a (sample)" 
                 maxWidth="70vw" 
                 centered
-                color={'rgba(255, 255, 255, 0.55)'}
+                color={'rgba(127, 127, 127, 1)'}
             >
                 {markdownContent}
             </Card>
