@@ -21,8 +21,8 @@ let repoURL; // Declare repoURL in the outer scope
 let numberOfCommits; // Declare numberOfCommits in the outer scope
 
 // Prompt the user for the repository URL
-rl.question('Repository URL (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
-    const urlPattern = /^(https?:\/\/[^\s]+\.git|git@.*\.git)$/; // Regex to match valid URLs or .git endings
+rl.question('Repository URL or .git (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
+    const urlPattern = /^(https?:\/\/[^\s]+\.git|git@.*\.git|https?:\/\/github\.com\/[^\s]+)$/; // Updated regex to allow GitHub URLs
     if (!inputRepoURL) {
         console.log(`No repository URL provided. Using default: ${defaultRepoURL}`);
         repoURL = defaultRepoURL;

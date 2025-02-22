@@ -49,7 +49,7 @@ async function generateChangelog(commits, repoUrl) {
     
     try { // Call OpenAI API to summarize the changes
         const completion = await openai.beta.chat.completions.parse({
-            model: "gpt-4o-2024-08-06",
+            model: "gpt-4o-mini-2024-07-18",
             messages: [
                 { role: "system", content: `Given the git commits, generate a changelog in the format of a common changelog.org file. All gits that share the same date should be grouped together into the same version. Give 1-3 changes per commit. The repository is: ${repoUrl}` },
                 { role: "user", content: commitsJson }
@@ -76,7 +76,10 @@ async function generateChangelog(commits, repoUrl) {
 
             // Format the grouped changes
             for (const [type, { items, urls }] of Object.entries(groupedChanges)) {
-                changeItems.push(`### ${type.charAt(0).toUpperCase() + type.slice(1)}\n${items.map(item => `- ${item}`).join('\n')}\n${urls.map(url => `([View Commit](${url.replace(/\.git/g, '')}))`).join(' ')}`);
+                changeItems.push(`### ${type.charAt(0).toUpperCase() + type.slice(1)}\n${items.map((item, index) => {
+                    const url = urls[index];
+                    return `- ${item} ${url ? `([View Commit](${url.replace(/\.git/g, '')}))` : ''}`;
+                }).join('\n')}`);
             }
             
             const changesList = changeItems.join('\n');
@@ -155,12 +158,12 @@ async function fetchCommits(repoUrl, numberOfCommits) {
             // Summarize the commit using OpenAI
             try {
                 const summaryResponse = await openai.chat.completions.create({
-                    model: "gpt-4",
+                    model: "gpt-4o-mini-2024-07-18",
                     messages: [
                         { role: "system", content: "Summarize the commit messages and diffs. Be objective and detailed. Don't speak in first person." },
                         { role: "user", content: `Summarize the following commit:\n\nMessage: ${commitInfo.message}\nDiff:\n${commitInfo.diffs}` }
                     ],
-                    max_tokens: 1000 // Adjust as needed
+                    max_tokens: 300 // Adjust as needed
                 });
 
                 // Check if the response structure is as expected
