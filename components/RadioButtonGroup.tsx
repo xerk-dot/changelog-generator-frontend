@@ -13,7 +13,7 @@ interface RadioOption {
 interface RadioButtonGroupProps {
   options: RadioOption[];
   defaultValue?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: number) => void;
   tabCount?: number;
 }
 
@@ -23,7 +23,7 @@ const RadioButtonGroup: React.FC<RadioButtonGroupProps> = ({ options, defaultVal
   const handleSelect = (value: string) => {
     setSelectedValue(value);
     if (onChange) {
-      onChange(value);
+      onChange(Number(value));
     }
   };
 

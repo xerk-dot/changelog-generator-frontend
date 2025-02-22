@@ -9,11 +9,13 @@ interface RangerProps {
   max?: number;
   min?: number;
   step?: number;
+  value?: number;
+  onChange?: (value: number) => void;
 }
 
-const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 5000, min = 0, step = 1 }) => {
+const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 5000, min = 0, step = 1, value, onChange }) => {
   const sliderRef = React.useRef<HTMLInputElement>(null);
-  const [displayValue, setDisplayValue] = React.useState<number>(defaultValue);
+  const [displayValue, setDisplayValue] = React.useState<number>(value !== undefined ? value : defaultValue);
 
   const maxDigits = max.toString().length;
 
@@ -29,8 +31,11 @@ const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 5000
   }, [defaultValue]);
 
   const scrub = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const value = parseInt(event.target.value, 10);
-    setDisplayValue(value);
+    const newValue = parseInt(event.target.value, 10);
+    setDisplayValue(newValue);
+    if (onChange) {
+      onChange(newValue);
+    }
   };
 
   return (
