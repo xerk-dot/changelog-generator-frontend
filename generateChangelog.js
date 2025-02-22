@@ -1,41 +1,101 @@
-// generateChangelog.js
-const fs = require('fs');
-const path = require('path');
-const OpenAI = require('openai'); // Import OpenAI library
-const axios = require('axios'); // Import axios for HTTP requests
-require('dotenv').config();
+import { z } from "zod";
+import { zodResponseFormat } from "openai/helpers/zod";
+import fs from 'fs';
+import path from 'path';
+import OpenAI from 'openai';
+import dotenv from 'dotenv';
+import { Octokit } from "octokit";
 
-const openai = new OpenAI({apiKey: process.env.OPENAI_API_KEY}); // Initialize OpenAI client
+dotenv.config();
 
-// Function to generate changelog
-async function generateChangelog(repoUrl) {
-    const commits = await fetchCommits(repoUrl); // Fetch all commits from the repository
-    const changelogEntries = commits.map((commit, index) => {
-        const commitNumber = (index + 1).toString().padStart(4, '0'); // Format the number to 000X
-        return `- ${commitNumber}: ${commit.commit.message} (by ${commit.commit.author.name})`; // Include the number in the entry
-    }).join('\n'); // Format commits
+const octokit = new Octokit({ 
+    auth: process.env.GITHUB_TOKEN
+});
 
-    // Call OpenAI API to summarize the changes
-    try {
-        const completion = await openai.chat.completions.create({
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    organization: process.env.OPENAI_ORGANIZATION,
+    project: process.env.OPENAI_PROJECT
+});
+
+const ChangeType = {
+    ADDED: 'added',
+    CHANGED: 'changed',
+    DEPRECATED: 'deprecated',
+    REMOVED: 'removed',
+    FIXED: 'fixed',
+    SECURITY: 'security'
+};
+const ChangeDescription = z.object({
+    thingsChanged: z.array(z.string()),
+    githubCommitURL: z.array(z.string())
+});
+const Changes = z.object({
+    type: z.nativeEnum(ChangeType),
+    description: ChangeDescription
+});
+
+const Version = z.object({
+    dateOfThisVersion: z.string(),
+    oneToTwoSentenceDescription: z.string(),
+    changesAssociatedWithThisVersion: z.array(Changes)
+});
+const ChangelogGenerator = z.object({
+    versions: z.array(Version)
+});
+
+async function generateChangelog(commits, repoUrl) {
+    const commitsJson = JSON.stringify(commits, null, 2);
+    
+    try { // Call OpenAI API to summarize the changes
+        const completion = await openai.beta.chat.completions.parse({
             model: "gpt-4o-2024-08-06",
             messages: [
-                { role: "system", content: "You are a helpful changelog generator. Summarize the following commit messages." },
-                { role: "user", content: `Here are the commit messages:\n${changelogEntries}` },
+                { role: "system", content: `Given the git commits, generate a changelog in the format of a common changelog.org file. All gits that share the same date should be grouped together into the same version. The repository is: ${repoUrl}` },
+                { role: "user", content: commitsJson }
             ],
+            max_tokens: 3000,
+            response_format: zodResponseFormat(ChangelogGenerator, "changelog_generator")
         });
+        const generatedChangelog = completion.choices[0].message.parsed;
+        const jsonString = JSON.stringify(generatedChangelog, null, 2);
+        const formattedChangelog = generatedChangelog.versions.map(version => {
+            const oneToTwoSentenceDescription = `## ${version.dateOfThisVersion}\n${version.oneToTwoSentenceDescription}`;
+            const changeItems = [];
+            const groupedChanges = {};
 
-        const generatedChangelog = completion.choices[0].message.content; // Extract the generated changelog
+            // Group changes by type
+            version.changesAssociatedWithThisVersion.forEach(change => {
+                const type = change.type;
+                if (!groupedChanges[type]) {
+                    groupedChanges[type] = { items: [], urls: [] }; // Store items and URLs separately
+                }
+                groupedChanges[type].items.push(...change.description.thingsChanged);
+                groupedChanges[type].urls.push(...change.description.githubCommitURL);
+            });
+
+            // Format the grouped changes
+            for (const [type, { items, urls }] of Object.entries(groupedChanges)) {
+                changeItems.push(`### ${type.charAt(0).toUpperCase() + type.slice(1)}\n${items.map(item => `- ${item}`).join('\n')}\n${urls.map(url => `([View Commit](${url.replace(/\.git/g, '')}))`).join(' ')}`);
+            }
+            
+            const changesList = changeItems.join('\n');
+            return `${oneToTwoSentenceDescription}\n${changesList}`;
+        }).join('\n\n');
 
         const changelog = `
-# Changelog
 
-## [1.0.0] - ${new Date().toISOString().split('T')[0]} // Update this version and date accordingly
-_First release._
+        
+# CHANGELOG
 
-### Added
-${generatedChangelog} // Updated to include commit messages
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project does adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+${formattedChangelog}
         `;
+
         return changelog;
     } catch (error) {
         console.error('Error from OpenAI API:', error.response ? error.response.data : error.message);
@@ -43,29 +103,94 @@ ${generatedChangelog} // Updated to include commit messages
     }
 }
 
-// Function to fetch all commits from the GitHub repository
+// Function to fetch all commits from the GitHub repository with additional details
 async function fetchCommits(repoUrl) {
+    if (typeof repoUrl !== 'string') {
+        throw new Error('Invalid repository URL. It must be a string.');
+    }
+
     const urlParts = repoUrl.split('/');
     const owner = urlParts[urlParts.length - 2]; // Extract owner
     const repo = urlParts[urlParts.length - 1].replace('.git', ''); // Extract repo name
 
     const allCommits = [];
     let page = 1;
-    let perPage = 100; // Number of commits per page
+    const perPage = 10; // Set to 10 to fetch only the last 10 commits
     let response;
 
     do {
-        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${perPage}&page=${page}`;
-        response = await axios.get(apiUrl); // Make a GET request to the GitHub API
-        allCommits.push(...response.data); // Add the fetched commits to the allCommits array
-        page++; // Increment the page number
-    } while (response.data.length > 0); // Continue until no more commits are returned
+        console.log(`Fetching page ${page} of commits...`);
+        response = await octokit.rest.repos.listCommits({
+            owner,
+            repo,
+            per_page: perPage,
+            page: page
+        });
 
-    return allCommits; // Return all fetched commits
+        console.log(`Fetched ${response.data.length} commits from GitHub.`);
+
+        for (const commit of response.data) {
+            const commitDetails = await octokit.rest.repos.getCommit({
+                owner,
+                repo,
+                ref: commit.sha
+            });
+            const commitInfo = {
+                sha: commitDetails.data.sha,
+                author: commitDetails.data.commit.author.name,
+                message: commitDetails.data.commit.message,
+                timestampOfCommit: commitDetails.data.commit.author.date,
+                files: commitDetails.data.files.map(file => ({
+                    filename: file.filename,
+                    status: file.status,
+                    changes: file.changes
+                })),
+                diffs: commitDetails.data.files.map(file => file.patch).join('\n') // Combine diffs into a single string
+            };
+
+            console.log(`Processing commit: ${commitInfo.sha}`);
+            //console.log(`Commit message: ${commitInfo.message}`);
+            //console.log(`Diffs: ${commitInfo.diffs}`);
+
+            // Summarize the commit using OpenAI
+            try {
+                const summaryResponse = await openai.chat.completions.create({
+                    model: "gpt-4",
+                    messages: [
+                        { role: "system", content: "Summarize the commit messages and diffs. Be objective and detailed. Don't speak in first person." },
+                        { role: "user", content: `Summarize the following commit:\n\nMessage: ${commitInfo.message}\nDiff:\n${commitInfo.diffs}` }
+                    ],
+                    max_tokens: 1000 // Adjust as needed
+                });
+
+                // Check if the response structure is as expected
+                if (summaryResponse && summaryResponse.choices && summaryResponse.choices.length > 0) {
+                    commitInfo.summary = summaryResponse.choices[0].message.content; // Store the summary
+                    //console.log(`Summary for commit ${commitInfo.sha}: ${commitInfo.summary}`);
+                } else {
+                    console.error('Unexpected response structure from OpenAI API:', summaryResponse);
+                    commitInfo.summary = "Summary not available"; // Handle as needed
+                }
+            } catch (summaryError) {
+                console.error('Error summarizing commit:', commitInfo.sha, summaryError.message);
+                commitInfo.summary = "Error generating summary"; // Handle as needed
+            }
+            delete commitInfo.diffs;
+            delete commitInfo.files;
+            allCommits.push(commitInfo);
+        }
+        page++;
+    } while (response.data.length > 0 && allCommits.length < 1);
+
+    //console.log(JSON.stringify(allCommits, null, 2)); // Print all commits with details
+    console.log("Finished fetching commits. Total commits fetched: " + allCommits.length);
+    return allCommits; // Return all fetched commits with details
 }
 
 // Function to save changelog to a file
 function saveChangelog(changelog) {
+    const __filename = new URL(import.meta.url).pathname; // Get the current file path
+    const __dirname = path.dirname(__filename); // Get the directory name
     const filePath = path.join(__dirname, 'public', 'changelog.md');
     fs.writeFileSync(filePath, changelog);
     console.log('Changelog generated and saved to public/changelog.md');
@@ -78,8 +203,5 @@ if (!repoUrl) {
     process.exit(1);
 }
 
-generateChangelog(repoUrl)
-    .then(saveChangelog)
-    .catch(error => {
-        console.error('Error generating changelog:', error);
-    });
+const commits = await fetchCommits(repoUrl);
+saveChangelog(await generateChangelog(commits, repoUrl));

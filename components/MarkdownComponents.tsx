@@ -8,16 +8,27 @@ export const MarkdownComponents = {
         <h1 style={{ marginBottom: '1em' }}>{children}</h1>
     ),
     h2: ({ children }) => (
-        <h2 style={{ marginTop: '1em', marginBottom: '0.75em' }}>{children}</h2>
+        <h2 style={{ marginTop: '2em', marginBottom: '0.75em' }}>{children}</h2>
     ),
     h3: ({ children }) => (
-        <h3 style={{ marginTop: '2.5em', marginBottom: '0.5em', paddingLeft: '1.5rem' }}>{children}</h3>
+        <h3 style={{ marginTop: '1em', marginBottom: '0.5em', paddingLeft: '1.5rem' }}>{children}</h3>
     ),
-    code: ({ children }) => (
-        <pre style={{ backgroundColor: 'rgba(128, 128, 128, 0.2)', padding: '1em', paddingLeft: '1.5rem', marginBottom: '.5em' }}>
-            <code>{children}</code>
-        </pre>
-    ),
+    // ... existing code ...
+    code: ({ children }) => {
+        const codeString = String(children).trim();
+        
+        // Check if the code string is wrapped in triple backticks
+        if (codeString.startsWith('```') && codeString.endsWith('```')) {
+            return (
+                <pre style={{ backgroundColor: 'rgba(128, 128, 128, 0.2)', padding: '1em', paddingLeft: '1.5rem', marginBottom: '.5em' }}>
+                    <code>{codeString.slice(3, -3).trim()}</code>
+                </pre>
+            );
+        }
+        
+        // If it's wrapped in single backticks, italicize the text
+        return <em>{codeString.slice(1, -1)}</em>;
+    },
     pre: ({ children }) => (
         <pre style={{ backgroundColor: 'rgba(128, 128, 128, 0.2)', padding: '1em', paddingLeft: '1.5rem', marginBottom: '.5em' }}>
             {children}

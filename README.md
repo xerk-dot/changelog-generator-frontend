@@ -1,6 +1,8 @@
 # changelog
 
+...
 ___
+
 # PART I
 
 ## what is this?
@@ -60,10 +62,16 @@ there are many non-AI implementations, from [git-cliff](https://github.com/orhun
 
 ### what should be on the changelog? how is it structured/syntaxed?
 
-[common-changelog.org](https://github.com/vweevers/common-changelog) has a list of implementations, and a specification for how a changelog should be formatted. so does [keepachangelog.com](https://keepachangelog.com/en/1.1.0/).`   
+[common-changelog.org](https://github.com/vweevers/common-changelog) has a list of implementations, and a specification for how a changelog should be formatted. so does [keepachangelog.com](https://keepachangelog.com/en/1.1.0/).   
 
 
-### how will we organize the commits into versions/releases?
+### what is important about commits?
+
+- not necessarily the author
+- the date is important
+- the message is important
+- the files changed are important
+- the commit hash is useful for linking to the commit
 
 ### let's make frontend decisions
 
@@ -74,5 +82,6 @@ there are many non-AI implementations, from [git-cliff](https://github.com/orhun
 
 ### let's make backend decisions
 
+- use `pnpm i octokit` to fetch the commits from github
 - i want to use openai to generate the changelog.
-- we will use structured output to guide the format of the changelog.
+- we will use openai's structured output to guide the format of the changelog.

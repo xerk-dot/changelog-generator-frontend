@@ -60,7 +60,7 @@ import UpdatingDataTable from '@components/examples/UpdatingDataTable';
 import Footer from '@components/Footer';
 import Hero from '@components/Hero';
 import Navigation from '@components/Navigation_updated';
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import { ModalProvider } from '@components/page/ModalContext';
 import ResponsiveTextDisplay from '@components/ResponsiveTextDisplay';
 import SubtitleHeader from '@components/SubtitleHeader';
@@ -74,9 +74,9 @@ import Link from 'next/link';
 import RadioButton from '@root/components/RadioButton';
 import ReactMarkdown from 'react-markdown';
 import { MarkdownComponents } from '@root/components/MarkdownComponents';
-const Carousel = lazy(() =>
-  import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
-);
+
+
+
 
 export default function Page() {
     const [repoUrl, setRepoUrl] = useState<string>(''); // State to hold the input value
@@ -86,6 +86,25 @@ export default function Page() {
     const [changelog, setChangelog] = useState<string>(''); // State to hold changelog content
     const [commitOption, setCommitOption] = useState<string>('one'); // State to track selected commit option
     const [secondCommitOption, setSecondCommitOption] = useState<string>('one'); // State for the second button group
+
+    // Fetch changelog.md when the component mounts
+    useEffect(() => {
+        const fetchChangelog = async () => {
+            try {
+                const changelogResponse = await fetch('/changelog.md'); // Fetching from the public folder
+                if (!changelogResponse.ok) {
+                    throw new Error('Failed to fetch changelog');
+                }
+                const changelogText = await changelogResponse.text();
+                setChangelog(changelogText); // Store the changelog content
+            } catch (error) {
+                console.error('Error fetching changelog:', error);
+                setErrorMessage('Failed to load changelog.'); // Set error message for display
+            }
+        };
+
+        fetchChangelog(); // Call the function to fetch the changelog
+    }, []); // Empty dependency array to run only once on mount
 
     const handleGenerate = async () => {
         setIsLoading(true); // Set loading status to true when button is pressed
@@ -121,8 +140,8 @@ export default function Page() {
             console.log(data); // Process the response as needed
             setSuccessMessage(data.message); // Set success message for display
 
-            // Fetch the changelog.md file after it is generated
-            const changelogResponse = await fetch('/changelog.md');
+            // Fetch the changelog.md file from the public folder after it is generated
+            const changelogResponse = await fetch('/changelog.md'); // Fetching from the public folder
             if (!changelogResponse.ok) {
                 throw new Error('Failed to fetch changelog');
             }
@@ -140,10 +159,14 @@ export default function Page() {
           {changelog}
       </ReactMarkdown>
     );
-
     return (
         <div>
             <Hero word="(CHANGE)LOG" isHalfHeight={true}></Hero>
+            {(
+                <Card title="a (sample)" maxWidth="70vw" centered>
+                    {markdownContent}
+                </Card>
+            )}
             <Card title="settings" maxWidth="70vw" centered>
                 <Input
                     type="text"
@@ -177,15 +200,11 @@ export default function Page() {
                 {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
                 
-                <Button onClick={handleGenerate}>Generate Changelog</Button>
+                <Button onClick={handleGenerate}>Generate Your Own Changelog</Button>
             </Card>
             {isLoading && <BarLoader intervalRate={1000} />}
 
-            {(changelog) && (
-                <Card title="changelog" maxWidth="70vw" centered>
-                    {markdownContent}
-                </Card>
-            )}
+
         </div>
     );
 }
