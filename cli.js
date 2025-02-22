@@ -1,3 +1,5 @@
+
+
 // cli.js
 import { spawn } from 'child_process';
 import readline from 'readline';
@@ -21,7 +23,7 @@ let repoURL; // Declare repoURL in the outer scope
 let numberOfCommits; // Declare numberOfCommits in the outer scope
 
 // Prompt the user for the repository URL
-rl.question('Repository URL or .git (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
+rl.question('\x1b[1m Repository URL or .git \x1b[0m (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
     const urlPattern = /^(https?:\/\/[^\s]+\.git|git@.*\.git|https?:\/\/github\.com\/[^\s]+)$/; // Updated regex to allow GitHub URLs
     if (!inputRepoURL) {
         console.log(`No repository URL provided. Using default: ${defaultRepoURL}`);
@@ -34,7 +36,7 @@ rl.question('Repository URL or .git (or press Enter to use the default: ' + defa
         return; // Exit the function
     }
 
-    rl.question('Use default settings for commit selection? (last 10 commits) (Y/n):', (defaultSettings) => {
+    rl.question('\x1b[1m Use default settings for commit selection? \x1b[0m (last 10 commits) (Y/n):', (defaultSettings) => {
         if (defaultSettings === 'Y' || defaultSettings === 'y' || defaultSettings === '') {
             numberOfCommits = 10;
             proceedWithChangelog(); // Call the function to proceed
@@ -66,7 +68,7 @@ function proceedWithChangelog() {
             console.error(`generateChangelog process exited with code: ${code}`);
         } else {
             // Now ask the second question after the first command has finished
-            rl.question('Release to the public-facing next.js site (vc --prod)? (Y/n): ', (updateWebsite) => {
+            rl.question('\x1b[1m Release to the public-facing next.js site (vc --prod)? \x1b[0m (Y/n): ', (updateWebsite) => {
                 if (updateWebsite === 'Y' || updateWebsite === 'y' || updateWebsite === '') {
                     // Execute the vc command with streaming output using spawn
                     const vcProcess = spawn('vc', ['--prod'], { stdio: 'inherit' });

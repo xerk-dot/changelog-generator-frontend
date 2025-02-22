@@ -19,7 +19,7 @@ The task is to build an AI-powered changelog generator.
 
 The challenge with writing changelogs is twofold:
 
-1. You have to go through a few days of commits to make a list of everything that’s changed
+1. You have to go through a few days of commits to make a list of everything that's changed
 2. You have to summarize the changes that would be relevant to an end-user in a few bullet points.
 
 The submission should have two parts:
@@ -35,7 +35,7 @@ The submission will be evaluated on the following criteria:
 - Does the backend logic make sense?
 - Is there evidence of user-centered product design choices?
 - Is it pretty (simple and minimal can be beautiful)?
-- How is the UX from the developer’s perspective? How easy is it now for them to write a changelog?
+- How is the UX from the developer's perspective? How easy is it now for them to write a changelog?
 
 ```
 
