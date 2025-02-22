@@ -1,6 +1,10 @@
-# changelog
+# changelog generator
 
-...
+
+
+https://github.com/user-attachments/assets/8d2df76c-6f73-491f-a278-acbb409b520c
+
+
 ___
 
 # what is this repo?
