@@ -61,7 +61,7 @@ function proceedWithChangelog() {
             console.error(`generateChangelog process exited with code: ${code}`);
         } else {
             // Now ask the second question after the first command has finished
-            rl.question('Update the next.js website? (Y/n): ', (updateWebsite) => {
+            rl.question('Release to the public-facing next.js site (vc --prod)? (Y/n): ', (updateWebsite) => {
                 if (updateWebsite === 'Y' || updateWebsite === 'y' || updateWebsite === '') {
                     // Execute the vc command with streaming output using spawn
                     const vcProcess = spawn('vc', ['--prod'], { stdio: 'inherit' });

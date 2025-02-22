@@ -2,13 +2,15 @@
 
 import styles from '@components/Navigation.module.scss';
 
-import * as React from 'react';
 import { usePathname } from 'next/navigation';
 import ModalTrigger from '@components/ModalTrigger';
 import ActionButton from '@components/ActionButton';
 import ModalCreateAccount from '@components/modals/ModalCreateAccount';
 import Link from 'next/link';
 import DropdownMenuTrigger from '@components/DropdownMenuTrigger';
+import React, { useEffect, useState } from 'react';
+import { FaGithub, FaTwitter } from 'react-icons/fa';
+import Badge from '@components/Badge';
 
 interface NavigationProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
@@ -23,7 +25,8 @@ interface NavigationProps extends React.HTMLAttributes<HTMLElement> {
 
 const Navigation: React.FC<NavigationProps> = ({ children, logoHref, logoTarget, onClickLogo, logo, left, right, logoRightAligned = false }) => {
   const pathname = usePathname();
- 
+  const [latestCommitDate, setLatestCommitDate] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const renderModals = () => {
     switch (pathname) {
@@ -57,7 +60,23 @@ const Navigation: React.FC<NavigationProps> = ({ children, logoHref, logoTarget,
     }
   };
 
+  useEffect(() => {
+    const fetchLatestCommitDate = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/xerk-dot/changelog/commits?per_page=1');
+        const data = await response.json();
+        if (data.length > 0) {
+          setLatestCommitDate(new Date(data[0].commit.author.date).toLocaleDateString());
+        }
+      } catch (error) {
+        console.error('Error fetching latest commit date:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchLatestCommitDate();
+  }, []);
 
   return (
     <nav>
@@ -85,7 +104,7 @@ const Navigation: React.FC<NavigationProps> = ({ children, logoHref, logoTarget,
       }}>
         <ActionButton 
           onClick={() => window.open('https://github.com/xerk-dot/changelog-custom', '_blank')} 
-          hotkey="v0.22"
+          hotkey={loading ? "" : latestCommitDate || "2025-02-22"}
           style={{ cursor: 'pointer' }}
         >
            changelog 

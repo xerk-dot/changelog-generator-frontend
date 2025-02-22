@@ -198,7 +198,7 @@ export default function Page() {
           </Suspense>
         </div>
       )}
-            <Hero word="(CHANGE)LOG" isHalfHeight={true}></Hero>
+            <Hero word="(CHANGE)LOG" isHalfHeight={true} isBlinkingAtEnd={true}></Hero>
             <Card 
                 title="a (sample)" 
                 maxWidth="70vw" 
