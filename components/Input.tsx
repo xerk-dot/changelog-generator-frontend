@@ -9,9 +9,10 @@ type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   caretChars?: string | any;
   label?: string | any;
   isBlink?: boolean;
+  redAsterisk?: boolean;
 };
 
-function Input({ caretChars, isBlink = true, label, placeholder, onChange, type, id, ...rest }: InputProps) {
+function Input({ caretChars, isBlink = true, label, placeholder, onChange, type, id, redAsterisk = false,  ...rest }: InputProps) {
   const generatedId = React.useId();
   const inputId = id || generatedId;
 
@@ -93,9 +94,10 @@ function Input({ caretChars, isBlink = true, label, placeholder, onChange, type,
     <div className={containerClasses}>
       {label && (
         <label htmlFor={inputId} className={styles.label}>
-          {label}
+          {label}{redAsterisk && <span className={styles.asterisk}>*</span>}
         </label>
       )}
+      
       <div className={styles.inputContainer}>
         <div className={Utilities.classNames(styles.displayed, isPlaceholderVisible && styles.placeholder)}>
           {beforeCaretText}

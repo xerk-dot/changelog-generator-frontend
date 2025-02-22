@@ -22,11 +22,16 @@ let numberOfCommits; // Declare numberOfCommits in the outer scope
 
 // Prompt the user for the repository URL
 rl.question('Repository URL (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
+    const urlPattern = /^(https?:\/\/[^\s]+\.git|git@.*\.git)$/; // Regex to match valid URLs or .git endings
     if (!inputRepoURL) {
         console.log(`No repository URL provided. Using default: ${defaultRepoURL}`);
         repoURL = defaultRepoURL;
-    } else {
+    } else if (urlPattern.test(inputRepoURL)) {
         repoURL = inputRepoURL; // Assign the input to repoURL
+    } else {
+        console.log('Invalid repository URL. Please provide a valid URL or a .git repository.');
+        rl.close(); // Close readline interface on invalid input
+        return; // Exit the function
     }
 
     rl.question('Use default settings for commit selection? (last 10 commits) (Y/n):', (defaultSettings) => {

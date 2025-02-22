@@ -16,7 +16,7 @@
 
 .blinkingCursor {
   margin-top: -10px; // Adjusted to move the cursor up
-  height: 30px; // Set height for larger cursor
+  height: calc(30px + 1vw); // Set height for larger cursor
   display: inline-block; // Ensure the width and height are applied
   animation: blink 1s step-end infinite;
   font-size: calc(1em + 6vw); // Increased for larger text size
