@@ -74,9 +74,29 @@ import Link from 'next/link';
 import RadioButton from '@root/components/RadioButton';
 import ReactMarkdown from 'react-markdown';
 import { MarkdownComponents } from '@root/components/MarkdownComponents';
+import Carousel from '@components/Carousel';
+import { getCurrentTheme } from '@common/utilities';
 
 
+const Carousel = lazy(() =>
+    import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
+  );
 
+  const carouselImages = [
+
+    {
+      src: "https://picsum.photos/seed/1/1920/900",
+      alt: "Placeholder image 1", 
+    },
+    {
+      src: "https://picsum.photos/seed/13/1920/900",
+      alt: "Placeholder image 13",
+    },
+    {
+      src: "https://picsum.photos/seed/8/1920/900",
+      alt: "Placeholder image 8",
+    }
+  ];
 
 export default function Page() {
     const [repoUrl, setRepoUrl] = useState<string>(''); // State to hold the input value
@@ -86,6 +106,7 @@ export default function Page() {
     const [changelog, setChangelog] = useState<string>(''); // State to hold changelog content
     const [commitOption, setCommitOption] = useState<string>('one'); // State to track selected commit option
     const [secondCommitOption, setSecondCommitOption] = useState<string>('one'); // State for the second button group
+    const [currentTheme, setCurrentTheme] = useState<string>(''); // State to hold the current theme
 
     // Fetch changelog.md when the component mounts
     useEffect(() => {
@@ -104,6 +125,11 @@ export default function Page() {
         };
 
         fetchChangelog(); // Call the function to fetch the changelog
+    }, []); // Empty dependency array to run only once on mount
+
+    useEffect(() => {
+        const theme = getCurrentTheme(); // Get the current theme from the utility function
+        setCurrentTheme(theme); // Update the state with the current theme
     }, []); // Empty dependency array to run only once on mount
 
     const handleGenerate = async () => {
@@ -160,13 +186,29 @@ export default function Page() {
       </ReactMarkdown>
     );
     return (
-        <div>
+        <div style={{ position: 'relative' }}>
+      {(
+        <div className={styles.mobileCarouselWrapper}>
+          <Suspense fallback={null}>
+            <Carousel
+              placeholder="/bridge-gradient.png"
+              images={carouselImages}
+              width={1920}
+              height={900}
+              fadeBottom={true}
+            />
+          </Suspense>
+        </div>
+      )}
             <Hero word="(CHANGE)LOG" isHalfHeight={true}></Hero>
-            {(
-                <Card title="a (sample)" maxWidth="70vw" centered>
-                    {markdownContent}
-                </Card>
-            )}
+            <Card 
+                title="a (sample)" 
+                maxWidth="70vw" 
+                centered
+                color={'rgba(255, 255, 255, 0.55)'}
+            >
+                {markdownContent}
+            </Card>
             <Card title="settings" maxWidth="70vw" centered>
                 <Input
                     type="text"
@@ -203,8 +245,6 @@ export default function Page() {
                 <Button onClick={handleGenerate}>Generate Your Own Changelog</Button>
             </Card>
             {isLoading && <BarLoader intervalRate={1000} />}
-
-
         </div>
     );
 }

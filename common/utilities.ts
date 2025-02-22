@@ -51,15 +51,15 @@ export function onHandleThemeChange() {
     newTheme = 'theme-dark';
     body.classList.replace('theme-light', 'theme-dark');
   } else if (body.classList.contains('theme-dark')) {
-    newTheme = 'theme-blue';
-    body.classList.replace('theme-dark', 'theme-blue');
+    newTheme = 'theme-light';
+    body.classList.replace('theme-dark', 'theme-light');
   } else if (body.classList.contains('theme-blue')) {
     newTheme = 'theme-light';
     body.classList.replace('theme-blue', 'theme-light');
   } else {
     // If no theme class is present, set to light theme
-    body.classList.add('theme-blue');
-    newTheme = 'theme-blue';
+    body.classList.add('theme-light');
+    newTheme = 'theme-light';
   }
 
   // Save the theme preference
@@ -384,3 +384,13 @@ export const findFocusableDescendant = (container: Element | null, currentFocuse
 
   return null;
 };
+
+export function getCurrentTheme() {
+  if (document.body.classList.contains('theme-light')) {
+      return 'white';
+  } else if (document.body.classList.contains('theme-dark')) {
+      return 'black';
+  } else {
+      return 'blue'; // or any default theme
+  }
+}
