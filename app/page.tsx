@@ -74,29 +74,27 @@ import Link from 'next/link';
 import RadioButton from '@root/components/RadioButton';
 import ReactMarkdown from 'react-markdown';
 import { MarkdownComponents } from '@root/components/MarkdownComponents';
-import Carousel from '@components/Carousel';
+import { Carousel } from '@components/carousel/carousel';
 import { getCurrentTheme } from '@common/utilities';
 
-
-const Carousel = lazy(() =>
+const LazyCarousel = lazy(() =>
     import('@components/carousel/carousel').then(module => ({ default: module.Carousel }))
-  );
+);
 
-  const carouselImages = [
-
+const carouselImages = [
     {
-      src: "https://picsum.photos/seed/1/1920/900",
-      alt: "Placeholder image 1", 
+        src: "https://picsum.photos/seed/1/1920/900",
+        alt: "Placeholder image 1", 
     },
     {
-      src: "https://picsum.photos/seed/13/1920/900",
-      alt: "Placeholder image 13",
+        src: "https://picsum.photos/seed/13/1920/900",
+        alt: "Placeholder image 13",
     },
     {
-      src: "https://picsum.photos/seed/8/1920/900",
-      alt: "Placeholder image 8",
+        src: "https://picsum.photos/seed/8/1920/900",
+        alt: "Placeholder image 8",
     }
-  ];
+];
 
 export default function Page() {
     const [repoUrl, setRepoUrl] = useState<string>(''); // State to hold the input value

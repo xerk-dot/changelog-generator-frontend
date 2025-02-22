@@ -34,6 +34,20 @@ rl.question('Please enter the repository URL (or press Enter to use the default:
         }
         // Output the result
         console.log(`Output:\n${stdout}`);
+
+        // Run the vc --prod command
+        exec('vc --prod', (vcError, vcStdout, vcStderr) => {
+            if (vcError) {
+                console.error(`Error executing vc command: ${vcError.message}`);
+                return;
+            }
+            if (vcStderr) {
+                console.error(`Error: ${vcStderr}`);
+                return;
+            }
+            // Output the result of the vc command
+            console.log(`vc Output:\n${vcStdout}`);
+        });
     });
 
     // Close the readline interface
