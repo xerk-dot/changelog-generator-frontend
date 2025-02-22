@@ -51,7 +51,7 @@ async function generateChangelog(commits, repoUrl) {
         const completion = await openai.beta.chat.completions.parse({
             model: "gpt-4o-2024-08-06",
             messages: [
-                { role: "system", content: `Given the git commits, generate a changelog in the format of a common changelog.org file. All gits that share the same date should be grouped together into the same version. The repository is: ${repoUrl}` },
+                { role: "system", content: `Given the git commits, generate a changelog in the format of a common changelog.org file. All gits that share the same date should be grouped together into the same version. Give 1-3 changes per commit. The repository is: ${repoUrl}` },
                 { role: "user", content: commitsJson }
             ],
             max_tokens: 3000,
@@ -104,7 +104,7 @@ ${formattedChangelog}
 }
 
 // Function to fetch all commits from the GitHub repository with additional details
-async function fetchCommits(repoUrl) {
+async function fetchCommits(repoUrl, numberOfCommits) {
     if (typeof repoUrl !== 'string') {
         throw new Error('Invalid repository URL. It must be a string.');
     }
@@ -115,7 +115,7 @@ async function fetchCommits(repoUrl) {
 
     const allCommits = [];
     let page = 1;
-    const perPage = 10; // Set to 10 to fetch only the last 10 commits
+    const perPage = numberOfCommits;
     let response;
 
     do {
@@ -198,10 +198,6 @@ function saveChangelog(changelog) {
 
 // Main execution
 const repoUrl = process.argv[2]; // Get the repository URL from command line arguments
-if (!repoUrl) {
-    console.error('Repository URL is required.');
-    process.exit(1);
-}
-
-const commits = await fetchCommits(repoUrl);
+const numberOfCommits = process.argv[3];
+const commits = await fetchCommits(repoUrl, numberOfCommits);
 saveChangelog(await generateChangelog(commits, repoUrl));

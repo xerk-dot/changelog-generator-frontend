@@ -1,5 +1,5 @@
 // cli.js
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import readline from 'readline';
 
 // Create an interface for input and output
@@ -8,48 +8,79 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+// Handle Ctrl + C to exit gracefully
+process.on('SIGINT', () => {
+    console.log('\nExiting the process...');
+    rl.close(); // Close the readline interface
+    process.exit(0); // Exit the process
+});
+
 // Define a default repository URL
 const defaultRepoURL = 'https://github.com/NVIDIA/cutlass.git';
+let repoURL; // Declare repoURL in the outer scope
+let numberOfCommits; // Declare numberOfCommits in the outer scope
 
 // Prompt the user for the repository URL
-rl.question('Please enter the repository URL (or press Enter to use the default: ' + defaultRepoURL + '): ', (repoURL) => {
-    // Use the default URL if no input is provided
-    if (!repoURL) {
+rl.question('Repository URL (or press Enter to use the default: ' + defaultRepoURL + '): ', (inputRepoURL) => {
+    if (!inputRepoURL) {
         console.log(`No repository URL provided. Using default: ${defaultRepoURL}`);
         repoURL = defaultRepoURL;
+    } else {
+        repoURL = inputRepoURL; // Assign the input to repoURL
     }
 
-    // Construct the command to execute
-    const command = `node generateChangelog.js "${repoURL}"`;
-
-    // Execute the command
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Error executing command: ${error.message}`);
-            return;
+    rl.question('Use default settings for commit selection? (last 10 commits) (Y/n):', (defaultSettings) => {
+        if (defaultSettings === 'Y' || defaultSettings === 'y' || defaultSettings === '') {
+            numberOfCommits = 10;
+            proceedWithChangelog(); // Call the function to proceed
+        } else {
+            rl.question('Number of commits to fetch (default: 10): ', (input) => {
+                if (input && !isNaN(input)) {
+                    numberOfCommits = parseInt(input, 10);
+                } else {
+                    console.log('Invalid input. Using default: 10');
+                    numberOfCommits = 10; // Default value
+                }
+                proceedWithChangelog(); // Call the function to proceed
+            });
         }
-        if (stderr) {
-            console.error(`Error: ${stderr}`);
-            return;
-        }
-        // Output the result
-        console.log(`Output:\n${stdout}`);
+    });
+});
 
-        // Run the vc --prod command
-        exec('vc --prod', (vcError, vcStdout, vcStderr) => {
-            if (vcError) {
-                console.error(`Error executing vc command: ${vcError.message}`);
-                return;
-            }
-            if (vcStderr) {
-                console.error(`Error: ${vcStderr}`);
-                return;
-            }
-            // Output the result of the vc command
-            console.log(`vc Output:\n${vcStdout}`);
-        });
+// Function to proceed with changelog generation
+function proceedWithChangelog() {
+    // Execute the command with streaming output using spawn
+    const changelogProcess = spawn('node', ['generateChangelog.js', repoURL, numberOfCommits], { stdio: 'inherit' });
+
+    changelogProcess.on('error', (error) => {
+        console.error(`Error executing generateChangelog command: ${error.message}`);
     });
 
-    // Close the readline interface
-    rl.close();
-});
+    changelogProcess.on('exit', (code) => {
+        if (code !== 0) {
+            console.error(`generateChangelog process exited with code: ${code}`);
+        } else {
+            // Now ask the second question after the first command has finished
+            rl.question('Update the next.js website? (Y/n): ', (updateWebsite) => {
+                if (updateWebsite === 'Y' || updateWebsite === 'y' || updateWebsite === '') {
+                    // Execute the vc command with streaming output using spawn
+                    const vcProcess = spawn('vc', ['--prod'], { stdio: 'inherit' });
+
+                    vcProcess.on('error', (vcError) => {
+                        console.error(`Error executing vc command: ${vcError.message}`);
+                        rl.close(); // Close readline interface on error
+                    });
+
+                    vcProcess.on('exit', (vcCode) => {
+                        if (vcCode !== 0) {
+                            console.error(`vc process exited with code: ${vcCode}`);
+                        }
+                        rl.close(); // Close readline interface after completion
+                    });
+                } else {
+                    rl.close(); // Close readline interface if user chooses not to update
+                }
+            });
+        }
+    });
+}
