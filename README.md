@@ -43,9 +43,8 @@ The submission will be evaluated on the following criteria:
 
 1. we need to fetch (only the) commits from a GitHub repository
 2. to keep this straight-forward, both the frontend and developer tool will run the same file which generates a changelog from the commits
-3. we need to save the changelog to a (markdown? json?) file in the next.js app directory, which the frontend will read from
+3. we need to save the changelog to a markdown file in the next.js app directory, which the frontend will read from
 4. i want the frontend to be next.js, so we will make the developer tool compatible with (node)JS/TS
-5. implied requirement: ability to select a range of commits to use for the changelog. instructions imply a date range, but i want to allow the user to select the last N commits.
 
 ## how do i use this?
 
@@ -140,6 +139,7 @@ In a more fleshed-out product, the user could possibly want:
 - for each version/date, generate a description of the changes that were made.
 - when generating the markdown, group the changes by change type, such that all are grouped under the same subsubheader.
 - make sure links to the commits are included in the schema and eventual markdown.
+- i ultimately decided *not* to use langchain (like its GitHubToolkit that wraps PyGitHub with prebuilt tools for interactions). i decided this because changelogs/repos alone do not have enougj data that is dynamic/sparse/dense. langchain remains predominantly for research and chat interfaces in multitenant apps.
 
 #### displaying to the frontend
 - in the `cli.js` file, you can release to prod by running `vc --prod`
