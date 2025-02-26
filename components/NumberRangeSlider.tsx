@@ -1,5 +1,6 @@
 'use client';
 
+import { Slider } from '@shadcn/ui';
 import styles from '@components/NumberRangeSlider.module.scss';
 
 import * as React from 'react';
@@ -8,31 +9,15 @@ interface RangerProps {
   defaultValue?: number;
   max?: number;
   min?: number;
-  step?: number;
   value?: number;
   onChange?: (value: number) => void;
 }
 
-const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 5000, min = 0, step = 1, value, onChange }) => {
-  const sliderRef = React.useRef<HTMLInputElement>(null);
-  const [displayValue, setDisplayValue] = React.useState<number>(value !== undefined ? value : defaultValue);
+const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 20, min = 0, value, onChange }) => {
+  const [sliderValue, setSliderValue] = React.useState<number>(value !== undefined ? value : defaultValue);
 
-  const maxDigits = max.toString().length;
-
-  const padValue = (value: number): string => {
-    return value.toString().padStart(maxDigits, '0');
-  };
-
-  React.useEffect(() => {
-    if (sliderRef.current) {
-      sliderRef.current.value = String(defaultValue);
-    }
-    setDisplayValue(defaultValue);
-  }, [defaultValue]);
-
-  const scrub = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const newValue = parseInt(event.target.value, 10);
-    setDisplayValue(newValue);
+  const handleChange = (newValue: number) => {
+    setSliderValue(newValue);
     if (onChange) {
       onChange(newValue);
     }
@@ -40,10 +25,14 @@ const NumberRangeSlider: React.FC<RangerProps> = ({ defaultValue = 0, max = 5000
 
   return (
     <div className={styles.root}>
-      <label className={styles.left}>
-        <div className={styles.amount}>{padValue(displayValue)}</div>
-      </label>
-      <input className={styles.slider} defaultValue={defaultValue} max={max} min={min} onChange={scrub} ref={sliderRef} role="slider" step={step} tabIndex={0} type="range" />
+      <Slider
+        value={sliderValue}
+        min={min}
+        max={max}
+        onValueChange={handleChange}
+        step={1}
+      />
+      <div className={styles.amount}>{sliderValue}</div>
     </div>
   );
 };
