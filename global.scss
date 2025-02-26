@@ -399,3 +399,14 @@ p {
   background-color: var(--theme-focused-foreground);
   color: var(--theme-text);
 }
+
+.commit-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
